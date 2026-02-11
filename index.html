@@ -14,16 +14,17 @@
                 <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                     <div class="navbar-nav">
                         <a class="nav-link" href="#" @click="abrirVentana('alumnos')">Alumnos</a>
-                        <a class="nav-link" href="#" @clik="abrirVentana('materias')">Materias</a>
-                        <a class="nav-link" href="#" @clik="abrirVentana('docentes')">Docentes</a>
-                        <a class="nav-link" @clik="abrirVentana('inscripciones')">Inscripciones</a>
+                        <a class="nav-link" href="#" @click="abrirVentana('materias')">Materias</a>
+                        <a class="nav-link" href="#" @click="abrirVentana('docentes')">Docentes</a>
+                        <a class="nav-link" href="#" @click="abrirVentana('matriculas')">Matricula</a>
+                        <a class="nav-link" href="#" @click="abrirVentana('inscripciones')">Inscripciones</a>
                     </div>
                 </div>
             </div>
         </nav>
         <div id="appSistema" class="container-fluid">
             <alumnos :forms="forms" ref="alumnos" v-show="forms.alumnos.mostrar"></alumnos>
-            <busqueda_alumnos v-show="forms.busqueda_alumnos.mostrar"></busqueda_alumnos>
+            <busqueda-alumnos ref="busqueda_alumnos" v-show="forms.busqueda_alumnos.mostrar" @seleccionar="handleSeleccion"></busqueda-alumnos>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.2.0/dexie.min.js"

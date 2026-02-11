@@ -6,6 +6,9 @@ const busqueda_alumnos = {
         }
     },
     methods:{
+        modificarAlumno(alumno){
+            this.$emit('modificar', alumno);  
+        },
         async obtenerAlumnos(){
             this.alumnos = await db.alumnos.filter(
                 alumno => alumno.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
@@ -40,7 +43,7 @@ const busqueda_alumnos = {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="alumno in alumnos" :key="alumno.idAlumno" @click="modificarAlumno(alumno)">
+                        <tr v-for="alumno in alumnos" :key="alumno.idAlumno" @click="$emit('seleccionar', alumno)">
                             <td>{{ alumno.codigo }}</td>
                             <td>{{ alumno.nombre }}</td>
                             <td>{{ alumno.direccion }}</td>

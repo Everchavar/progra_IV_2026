@@ -6,7 +6,8 @@ const { createApp } = Vue,
 createApp({
     components:{
         alumnos,
-        busqueda_alumnos
+        busqueda_alumnos,
+        'busqueda-alumnos': busqueda_alumnos
     },
     data(){
         return{
@@ -23,9 +24,18 @@ createApp({
         }
     },
     methods:{
+        buscar(ventana, metodo){
+           this.$refs[ventana][metodo]();
+        },
         abrirVentana(ventana){
-            this.forms[ventana].mostrar = !this.forms[ventana].mostrar;
-            console.log(this.forms[ventana].mostrar, ventana);
+           this.forms[ventana].mostrar = !this.forms[ventana].mostrar;
+        },
+        handleSeleccion(alumno){
+            if(this.$refs.alumnos && this.$refs.alumnos.modificarAlumno){
+                this.$refs.alumnos.modificarAlumno(alumno);
+                this.forms.busqueda_alumnos.mostrar = false;
+                this.forms.alumnos.mostrar = true;
+            }
         }
     },
     mounted(){
