@@ -22,9 +22,9 @@
                 </div>
             </div>
         </nav>
-        <div id="appSistema" class="container-fluid">
-            <alumnos :forms="forms" ref="alumnos" v-show="forms.alumnos.mostrar"></alumnos>
-            <busqueda-alumnos ref="busqueda_alumnos" v-show="forms.busqueda_alumnos.mostrar" @seleccionar="handleSeleccion"></busqueda-alumnos>
+         <div id="appSistema" class="container-fluid">
+            <alumnos @buscar='buscar("busqueda_alumnos","obtenerAlumnos")' :forms="forms" ref="alumnos" v-show="forms.alumnos.mostrar"></alumnos>
+            <busqueda_alumnos @modificar='modificar("alumnos","modificarAlumno", $event)' ref="busqueda_alumnos" v-show="forms.busqueda_alumnos.mostrar"></busqueda_alumnos>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.2.0/dexie.min.js"
