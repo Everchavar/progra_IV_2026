@@ -1,5 +1,5 @@
 const alumnos = {
-    props: ['forms'],
+    props:['forms'],
     data(){
         return{
             alumno:{
@@ -42,12 +42,13 @@ const alumnos = {
             //await this.obtenerAlumnos();
 
             if(this.data_alumnos.length > 0 && this.accion=='nuevo'){
-                alert("El codigo del alumno ya existe, "+ this.data_alumnos[0].nombre);
+                alertify.error(`El codigo del alumno ya existe, ${this.data_alumnos[0].nombre}`);
                 return; //Termina la ejecucion de la funcion
             }
             db.alumnos.put(datos);
             this.limpiarFormulario();
-           //this.obtenerAlumnos(); 
+            alertify.success(`${datos.nombre} guardado correctamente`);
+            //this.obtenerAlumnos();
         },
         getId(){
             return new Date().getTime();
@@ -115,7 +116,7 @@ const alumnos = {
                                 <div class="col text-center">
                                     <button type="submit" id="btnGuardarAlumno" class="btn btn-primary">GUARDAR</button>
                                     <button type="reset" id="btnCancelarAlumno" class="btn btn-warning">NUEVO</button>
-                                    <button type="button" @click="buscarAlumno" id="btnBuscarAlumno" class="btn btn-success" >BUSCAR</button>
+                                    <button type="button" @click="buscarAlumno" id="btnBuscarAlumno" class="btn btn-success">BUSCAR</button>
                                 </div>
                             </div>
                         </div>

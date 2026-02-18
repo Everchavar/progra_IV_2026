@@ -7,7 +7,7 @@ const busqueda_alumnos = {
     },
     methods:{
         modificarAlumno(alumno){
-            this.$emit('modificar', alumno);  
+            this.$emit('modificar', alumno);
         },
         async obtenerAlumnos(){
             this.alumnos = await db.alumnos.filter(
@@ -15,12 +15,15 @@ const busqueda_alumnos = {
                     || alumno.nombre.toLowerCase().includes(this.buscar.toLowerCase())
             ).toArray();
         },
-        async eliminarAlumno(idAlumno, e){
+        async eliminarAlumno(alumno, e){
             e.stopPropagation();
-            if(confirm("¿Está seguro de eliminar el alumno?")){
-                await db.alumnos.delete(idAlumno);
+            alertify.confirm('Elimanar alumnos', `¿Está seguro de eliminar el alumno ${alumno.nombre}?`, async e=>{
+                await db.alumnos.delete(alumno.idAlumno);
                 this.obtenerAlumnos();
-            }
+                alertify.success(`Alumno ${alumno.nombre} eliminado correctamente`);
+            }, () => {
+                //No hacer nada
+            });
         },
     },
     template: `
@@ -43,14 +46,14 @@ const busqueda_alumnos = {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="alumno in alumnos" :key="alumno.idAlumno" @click="$emit('seleccionar', alumno)">
+                        <tr v-for="alumno in alumnos" :key="alumno.idAlumno" @click="modificarAlumno(alumno)">
                             <td>{{ alumno.codigo }}</td>
                             <td>{{ alumno.nombre }}</td>
                             <td>{{ alumno.direccion }}</td>
                             <td>{{ alumno.email }}</td>
                             <td>{{ alumno.telefono }}</td>
                             <td>
-                                <button class="btn btn-danger" @click="eliminarAlumno(alumno.idAlumno, $event)">DEL</button>
+                                <button class="btn btn-danger" @click="eliminarAlumno(alumno, $event)">DEL</button>
                             </td>
                         </tr>
                     </tbody>
