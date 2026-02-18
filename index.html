@@ -28,6 +28,9 @@
         <div id="appSistema" class="container-fluid mt-3">
             <alumnos @buscar='buscar("busqueda_alumnos","obtenerAlumnos")' :forms="forms" ref="alumnos" v-show="forms.alumnos.mostrar"></alumnos>
             <busqueda_alumnos @modificar='modificar("alumnos","modificarAlumno", $event)' ref="busqueda_alumnos" v-show="forms.busqueda_alumnos.mostrar"></busqueda_alumnos>
+
+            <materias @buscar='buscar("busqueda_materias","obtenerMaterias")' :forms="forms" ref="materias" v-show="forms.materias.mostrar"></materias>
+            <busqueda_materias @modificar='modificar("materias","modificarMateria", $event)' ref="busqueda_materias" v-show="forms.busqueda_materias.mostrar"></busqueda_materias>
            
             <docentes @buscar='buscar("busqueda_docentes","obtenerDocentes")' :forms="forms" ref="docentes" v-show="forms.docentes.mostrar"></docentes>
             <busqueda_docentes @modificar='modificar("docentes","modificarDocente", $event)' ref="busqueda_docentes" v-show="forms.busqueda_docentes.mostrar"></busqueda_docentes>
@@ -48,9 +51,11 @@
     <script src="componentes/alumnos.js"></script>
     <script src="componentes/busqueda_alumnos.js"></script>
     
+    <script src="componentes/materias.js"></script>
+    <script src="componentes/busqueda_materias.js"></script>
+    
     <script src="componentes/docentes.js"></script>
     <script src="componentes/busqueda_docentes.js"></script>
-    
     <script src="componentes/matricula.js"></script>
     <script src="componentes/busqueda_matricula.js"></script>
     <script src="componentes/inscripciones.js"></script>
