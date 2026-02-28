@@ -42,6 +42,7 @@ const busqueda_alumnos = {
                             <th>DIRECCION</th>
                             <th>EMAIL</th>
                             <th>TELEFONO</th>
+                            <th>HASH</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -52,6 +53,7 @@ const busqueda_alumnos = {
                             <td>{{ alumno.direccion }}</td>
                             <td>{{ alumno.email }}</td>
                             <td>{{ alumno.telefono }}</td>
+                            <td>{{ alumno.hash }}</td>
                             <td>
                                 <button class="btn btn-danger" @click="eliminarAlumno(alumno, $event)">DEL</button>
                             </td>
