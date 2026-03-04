@@ -1,58 +1,41 @@
-const { createApp } = Vue,
-    Dexie = window.Dexie,
-    db = new Dexie("db_academica");
+const {createApp, ref} = Vue;
+const Dexie = window.Dexie,
+    db = new Dexie('db_USSS002124');
 
-createApp({
-    components:{
-        alumnos,
-        busqueda_alumnos,
-        materias,
-        busqueda_materias,
-        docentes,
-        busqueda_docentes,
-        matricula,
-        busqueda_matricula,
-        inscripciones,          // <-- Faltaba registrar este
-        busqueda_inscripciones  // <-- Faltaba registrar este
+const app = createApp({
+    components: {
+        autor,
+        libro,
+        buscarautor,
+        buscarlibro
     },
-    data(){
-        return{
-            forms:{
-                alumnos:{mostrar:false},
-                busqueda_alumnos:{mostrar:false},
-                materias:{mostrar:false},
-                busqueda_materias:{mostrar:false},
-                docentes:{mostrar:false},
-                busqueda_docentes:{mostrar:false},
-                matricula:{mostrar:false},
-                busqueda_matricula:{mostrar:false},
-                inscripciones:{mostrar:false},
-                busqueda_inscripciones:{mostrar:false} // <-- Faltaba este estado
-            }
+    data() {
+        return {
+            forms : {
+                autor: {mostrar: false},
+                buscarAutor: {mostrar: false},
+                libro: {mostrar: false},
+                buscarLibro: {mostrar: false},
+                matricula: {mostrar: false},
+            },
+        };
+    },
+    methods: {
+        buscar(form, metodo) {
+            this.$refs[form][metodo]();
+        },
+        abrirFormulario(componente) {
+            this.forms[componente].mostrar = !this.forms[componente].mostrar;
+        },
+        modificar(form, metodo, datos) {
+            this.$refs[form][metodo](datos);
         }
     },
-    methods:{
-        buscar(ventana, metodo){
-            this.$refs[ventana][metodo]();
-        },
-        abrirVentana(ventana){
-            // Verificación de seguridad para evitar errores si la ventana no existe
-            if(this.forms[ventana]){
-                this.forms[ventana].mostrar = !this.forms[ventana].mostrar;
-            }
-        },
-        modificar(ventana, metodo, data){
-            this.forms[ventana].mostrar = true; 
-            this.$refs[ventana][metodo](data);
-        }
-    },
-    mounted(){
+    created() {
         db.version(1).stores({
-            alumnos: "idAlumno, codigo, nombre, direccion, email, telefono",
-            materias: "idMateria, codigo, nombre, uv",
-            docentes: "idDocente, codigo, nombre, direccion, email, telefono, escalafon",
-            matricula: "idMatricula, codigo, nombreAlumno, carrera, ciclo, fecha, estado",
-            inscripciones: "idInscripcion, idMatricula, alumno, materia, fecha, ciclo" // <-- Faltaba la tabla en DB
+            autores: '++idAutor, codigo, nombre, pais, telefono',
+            libros: '++idLibro, idAutor, isbn, titulo, editorial, edicion',
         });
     }
-}).mount("#app");
+});
+app.mount('#app');

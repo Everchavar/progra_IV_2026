@@ -1,66 +1,62 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SISTEMA ACADEMICO</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="css/style.css">
+    <title>Parcial 1</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css" />
+    <!-- Default theme -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css" />
+    <!-- Semantic UI theme -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/semantic.min.css" />
+    <!-- Bootstrap theme -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 </head>
+
 <body>
-    <div id="app">
-        <nav class="navbar navbar-expand-lg bg-light shadow-sm">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="#">::.. SISTEMA ACADEMICO ..::</a>
-                <div class="collapse navbar-collapse">
-                    <div class="navbar-nav">
-                        <a class="nav-link" href="#" @click="abrirVentana('alumnos')">Alumnos</a>
-                        <a class="nav-link" href="#" @click="abrirVentana('materias')">Materias</a>
-                        <a class="nav-link" href="#" @click="abrirVentana('docentes')">Docentes</a>
-                        <a class="nav-link" href="#" @click="abrirVentana('matricula')">Matricula</a>
-                        <a class="nav-link" href="#" @click="abrirVentana('inscripciones')">Inscripciones</a>
+    <div id="app" ref="app">
+        <div class="container-fluid">
+            <nav class="navbar navbar-expand-lg bg-body-tertiary">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="#">
+                        <img width="150" src="img/logo.png" alt="Logo biblioteca">
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText"
+                        aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarText">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link" @click="abrirFormulario('autor')" href="#">Autor</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" @click="abrirFormulario('libro')" href="#">Libro</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
-            </div>
-        </nav>
-
-        <div id="appSistema" class="container-fluid mt-3">
-            <alumnos @buscar='buscar("busqueda_alumnos","obtenerAlumnos")' :forms="forms" ref="alumnos" v-show="forms.alumnos.mostrar"></alumnos>
-            <busqueda_alumnos @modificar='modificar("alumnos","modificarAlumno", $event)' ref="busqueda_alumnos" v-show="forms.busqueda_alumnos.mostrar"></busqueda_alumnos>
-
-            <materias @buscar='buscar("busqueda_materias","obtenerMaterias")' :forms="forms" ref="materias" v-show="forms.materias.mostrar"></materias>
-            <busqueda_materias @modificar='modificar("materias","modificarMateria", $event)' ref="busqueda_materias" v-show="forms.busqueda_materias.mostrar"></busqueda_materias>
-           
-            <docentes @buscar='buscar("busqueda_docentes","obtenerDocentes")' :forms="forms" ref="docentes" v-show="forms.docentes.mostrar"></docentes>
-            <busqueda_docentes @modificar='modificar("docentes","modificarDocente", $event)' ref="busqueda_docentes" v-show="forms.busqueda_docentes.mostrar"></busqueda_docentes>
-
-            <matricula @buscar='buscar("busqueda_matricula","obtenerMatriculas")' :forms="forms" ref="matricula" v-show="forms.matricula.mostrar"></matricula>
-            <busqueda_matricula @modificar='modificar("matricula","modificarMatricula", $event)' ref="busqueda_matricula" v-show="forms.busqueda_matricula.mostrar"></busqueda_matricula>
-
-            <inscripciones @buscar='buscar("busqueda_inscripciones","obtenerInscripciones")' :forms="forms" ref="inscripciones" v-show="forms.inscripciones.mostrar"></inscripciones>
-            <busqueda_inscripciones @modificar='modificar("inscripciones","modificarInscripcion", $event)' ref="busqueda_inscripciones" v-show="forms.busqueda_inscripciones.mostrar"></busqueda_inscripciones>
+            </nav>
+        </div>
+        <div class="container-fluid" id="appSistema">
+            <autor v-show="forms.autor.mostrar" :forms="forms" ref="autor" @buscar="buscar('buscarautor', 'listarAutores')"></autor>
+            <buscarautor v-show="forms.buscarAutor.mostrar" ref="buscarautor" @modificar="modificar('autor', 'modificarAutor', $event)"></buscarautor>
+            <libro v-show="forms.libro.mostrar" :forms="forms" ref="libro" @buscar="buscar('buscarlibro', 'listarLibros')"></libro>
+            <buscarlibro v-show="forms.buscarLibro.mostrar" ref="buscarlibro" @modificar="modificar('libro', 'modificarLibro', $event)"></buscarlibro>
         </div>
     </div>
-
     <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dexie/4.2.0/dexie.min.js"></script>
+    <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    
-    <script src="componentes/alumnos.js"></script>
-    <script src="componentes/busqueda_alumnos.js"></script>
-    
-    <script src="componentes/materias.js"></script>
-    <script src="componentes/busqueda_materias.js"></script>
-    
-    <script src="componentes/docentes.js"></script>
-    <script src="componentes/busqueda_docentes.js"></script>
-    <script src="componentes/matricula.js"></script>
-    <script src="componentes/busqueda_matricula.js"></script>
-    <script src="componentes/inscripciones.js"></script>
-    <script src="componentes/busqueda_inscripciones.js"></script>
-    
+    <script src="componentes/busqueda_autores.js"></script>
+    <script src="componentes/autores.js"></script>
+    <script src="componentes/busqueda_libros.js"></script>
+    <script src="componentes/libros.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
