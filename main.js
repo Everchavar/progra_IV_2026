@@ -1,6 +1,8 @@
 const { createApp } = Vue,
     Dexie = window.Dexie,
-    db = new Dexie("db_academica");
+    db = new Dexie("db_academica"),
+    sha256 = CryptoJS.SHA256;
+
 
 createApp({
     components:{
@@ -9,11 +11,7 @@ createApp({
         materias,
         busqueda_materias,
         docentes,
-        busqueda_docentes,
-        matricula,
-        busqueda_matricula,
-        inscripciones,          // <-- Faltaba registrar este
-        busqueda_inscripciones  // <-- Faltaba registrar este
+        busqueda_docentes
     },
     data(){
         return{
@@ -24,10 +22,8 @@ createApp({
                 busqueda_materias:{mostrar:false},
                 docentes:{mostrar:false},
                 busqueda_docentes:{mostrar:false},
-                matricula:{mostrar:false},
-                busqueda_matricula:{mostrar:false},
-                inscripciones:{mostrar:false},
-                busqueda_inscripciones:{mostrar:false} // <-- Faltaba este estado
+                matriculas:{mostrar:false},
+                inscripciones:{mostrar:false}
             }
         }
     },
@@ -36,23 +32,17 @@ createApp({
             this.$refs[ventana][metodo]();
         },
         abrirVentana(ventana){
-            // Verificación de seguridad para evitar errores si la ventana no existe
-            if(this.forms[ventana]){
-                this.forms[ventana].mostrar = !this.forms[ventana].mostrar;
-            }
+            this.forms[ventana].mostrar = !this.forms[ventana].mostrar;
         },
         modificar(ventana, metodo, data){
-            this.forms[ventana].mostrar = true; 
             this.$refs[ventana][metodo](data);
         }
     },
     mounted(){
         db.version(1).stores({
-            alumnos: "idAlumno, codigo, nombre, direccion, email, telefono",
-            materias: "idMateria, codigo, nombre, uv",
-            docentes: "idDocente, codigo, nombre, direccion, email, telefono, escalafon",
-            matricula: "idMatricula, codigo, nombreAlumno, carrera, ciclo, fecha, estado",
-            inscripciones: "idInscripcion, idMatricula, alumno, materia, fecha, ciclo" // <-- Faltaba la tabla en DB
+            "alumnos": "idAlumno, codigo, nombre, direccion, email, telefono",
+            "materias": "idMateria, codigo, nombre, uv",
+            "docentes": "idDocente, codigo, nombre, direccion, email, telefono, escalafon"
         });
     }
 }).mount("#app");
