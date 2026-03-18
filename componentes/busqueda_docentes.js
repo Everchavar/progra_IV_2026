@@ -14,6 +14,15 @@ const busqueda_docentes = {
                 docente => docente.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
                     || docente.nombre.toLowerCase().includes(this.buscar.toLowerCase())
             ).toArray();
+            
+            if(this.docentes.length < 1 && this.buscar.length <= 0) {
+                fetch(`private/modulos/docentes/docente.php?accion=consultar`)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.docentes = data;
+                        db.docentes.bulkAdd(data);
+                    });
+            }
         },
         async eliminarDocente(docente, e){
             e.stopPropagation();
@@ -25,6 +34,12 @@ const busqueda_docentes = {
                 //No hacer nada
             });
         },
+        mostrarFormulario(ventana){
+            this.$emit('regresar', ventana);
+        }
+    },
+    mounted() {
+        this.obtenerDocentes();
     },
     template: `
         <div class="row">

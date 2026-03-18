@@ -41,14 +41,20 @@ const docentes = {
                 telefono: this.docente.telefono,
                 escalafon: this.docente.escalafon
             };
+            datos.hash = sha256(JSON.stringify(datos));
             this.buscar = datos.codigo;
             //await this.obtenerDocentes();
-
+ 
             if(this.data_docentes.length > 0 && this.accion=='nuevo'){
                 alertify.error(`El codigo del docente ya existe, ${this.data_docentes[0].nombre}`);
                 return; //Termina la ejecucion de la funcion
             }
             db.docentes.put(datos);
+            fetch(`private/modulos/docentes/docente.php?accion=${this.accion}&docentes=${JSON.stringify(datos)}`)
+                .then(response=>response.json())
+                .then(data=>{
+                    if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+                });
             this.limpiarFormulario();
             alertify.success(`${datos.nombre} guardado correctamente`);
             //this.obtenerDocentes();
@@ -72,7 +78,7 @@ const docentes = {
             <div class="col-6">
                 <form id="frmDocentes" @submit.prevent="guardarDocente" @reset.prevent="limpiarFormulario">
                     <div class="card text-bg-dark mb-3" style="max-width: 36rem;">
-                        <div class="card-header">REGISTRO DE ALUMNOS</div>
+                        <div class="card-header">REGISTRO DE DOCENTES</div>
                         <div class="card-body">
                             <div class="row p-1">
                                 <div class="col-3">
@@ -119,13 +125,7 @@ const docentes = {
                                     ESCALAFON:
                                 </div>
                                 <div class="col-4">
-                                    <select required title="Seleccione un escalafon" v-model="docente.escalafon" class="form-select">
-                                        <option value="tecnico">Tecnico</option>
-                                        <option value="profesor">Profesor</option>
-                                        <option value="ingeniero">Licenciado/Ingeniero</option>
-                                        <option value="maestria">Maestria</option>
-                                        <option value="doctor">Doctor</option>
-                                    </select>
+                                    <input placeholder="escalafon" required v-model="docente.escalafon" type="text" class="form-control">
                                 </div>
                             </div>
                         </div>
