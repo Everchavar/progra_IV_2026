@@ -41,26 +41,34 @@ const docentes = {
                 telefono: this.docente.telefono,
                 escalafon: this.docente.escalafon
             };
-            datos.hash = sha256(JSON.stringify(datos));
-            this.buscar = datos.codigo;
-            //await this.obtenerDocentes();
- 
-            if(this.data_docentes.length > 0 && this.accion=='nuevo'){
-                alertify.error(`El codigo del docente ya existe, ${this.data_docentes[0].nombre}`);
-                return; //Termina la ejecucion de la funcion
+            if(this.accion=='nuevo'){
+                let exist = await db.docentes.filter(d => d.codigo.toLowerCase() === datos.codigo.toLowerCase()).toArray();
+                if(exist.length > 0){
+                    alertify.error(`Docente ya registrado: ${exist[0].nombre}`);
+                    return;
+                }
             }
-            db.docentes.put(datos);
-            fetch(`private/modulos/docentes/docente.php?accion=${this.accion}&docentes=${JSON.stringify(datos)}`)
-                .then(response=>response.json())
-                .then(data=>{
-                    if(data!=true) alertify.error(`Error al sincronizar con el servidor: ${data}`);
+            let formData = new FormData();
+            formData.append('docentes', JSON.stringify(datos));
+            formData.append('accion', this.accion);
+
+            try {
+                let respuesta = await fetch("private/modulos/docentes/docente.php", {
+                    method: "POST",
+                    body: formData
                 });
-            this.limpiarFormulario();
-            alertify.success(`${datos.nombre} guardado correctamente`);
-            //this.obtenerDocentes();
+                let res = await respuesta.json();
+                
+                if (res === true || (typeof res === 'object' && res.msg === 'ok')) {
+                    db.docentes.put(datos);
+                    this.limpiarFormulario();
+                    alertify.success('Información de Docente Guardada');
+                    this.$emit('guardar');
+                }
+            } catch (e) { console.error(e); }
         },
         getId(){
-            return new Date().getTime();
+            return uuid.v4();
         },
         limpiarFormulario(){
             this.accion = 'nuevo';
@@ -75,68 +83,55 @@ const docentes = {
     },
     template: `
         <div class="row">
-            <div class="col-6">
-                <form id="frmDocentes" @submit.prevent="guardarDocente" @reset.prevent="limpiarFormulario">
-                    <div class="card text-bg-dark mb-3" style="max-width: 36rem;">
-                        <div class="card-header">REGISTRO DE DOCENTES</div>
-                        <div class="card-body">
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    CODIGO:
+            <div class="col-8">
+                <form id="frmDocentes" v-draggable @submit.prevent="guardarDocente" @reset.prevent="limpiarFormulario">
+                    <div class="card mb-3 shadow-lg border-0" style="background-color: #e0f7fa; border-radius: 20px; overflow: hidden;">
+                        <div class="card-header border-0 p-4" style="background-color: #00acc1; color: #ffffff;">
+                            <h4 class="mb-0 fw-bold"><i class="bi bi-person-workspace"></i> DOCENTES</h4>
+                            <p class="mb-0 small opacity-75">Administración de facultad académica</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row mb-3">
+                                <div class="col-4">
+                                    <label class="form-label fw-bold text-secondary small">CÓDIGO DOCENTE:</label>
+                                    <input placeholder="Cod-D" required v-model="docente.codigo" type="text" class="form-control border-0 shadow-sm" style="background-color: #fff; border-radius: 12px;">
                                 </div>
-                                <div class="col-3">
-                                    <input placeholder="codigo" required v-model="docente.codigo" type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    NOMBRE:
-                                </div>
-                                <div class="col-6">
-                                    <input placeholder="nombre" required v-model="docente.nombre" type="text" class="form-control">
+                                <div class="col-8">
+                                    <label class="form-label fw-bold text-secondary small">NOMBRE COMPLETO:</label>
+                                    <input placeholder="Nombre completo" required v-model="docente.nombre" type="text" class="form-control border-0 shadow-sm" style="background-color: #fff; border-radius: 12px;">
                                 </div>
                             </div>
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    DIRECCION:
-                                </div>
-                                <div class="col-9">
-                                    <input placeholder="direccion" required v-model="docente.direccion" type="text" class="form-control">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-secondary small">LUGAR DE DOMICILIO:</label>
+                                    <input required v-model="docente.direccion" type="text" class="form-control border-0 shadow-sm" style="background-color: #fff; border-radius: 12px;">
                                 </div>
                             </div>
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    EMAIL:
-                                </div>
-                                <div class="col-6">
-                                    <input placeholder="email" required v-model="docente.email" type="text" class="form-control">
-                                </div>
-                            </div>
-                            <div class="row p-1">
-                                <div class="col-3">
-                                    TELEFONO:
+                            <div class="row mb-3">
+                                <div class="col-5">
+                                    <label class="form-label fw-bold text-secondary small">ESCALAFÓN PROFESIONAL:</label>
+                                    <select required v-model="docente.escalafon" class="form-select border-0 shadow-sm" style="background-color: #fff; border-radius: 12px;">
+                                        <option value="tecnico">Técnico Superior</option>
+                                        <option value="profesor">Profesorado</option>
+                                        <option value="ingeniero">Licenciado / Ingeniero</option>
+                                        <option value="maestria">Maestría Académica</option>
+                                        <option value="doctor">Doctorado (PhD)</option>
+                                    </select>
                                 </div>
                                 <div class="col-4">
-                                    <input placeholder="telefono" required v-model="docente.telefono" type="text" class="form-control">
+                                    <label class="form-label fw-bold text-secondary small">CORREO:</label>
+                                    <input required v-model="docente.email" type="email" class="form-control border-0 shadow-sm" style="background-color: #fff; border-radius: 12px;">
                                 </div>
-                            </div>
-                            <div class="row p-1">
                                 <div class="col-3">
-                                    ESCALAFON:
-                                </div>
-                                <div class="col-4">
-                                    <input placeholder="escalafon" required v-model="docente.escalafon" type="text" class="form-control">
+                                    <label class="form-label fw-bold text-secondary small">CÉLULAR:</label>
+                                    <input required v-model="docente.telefono" type="text" class="form-control border-0 shadow-sm" style="background-color: #fff; border-radius: 12px;">
                                 </div>
                             </div>
                         </div>
-                        <div class="card-footer">
-                            <div class="row">
-                                <div class="col text-center">
-                                    <button type="submit" id="btnGuardarDocente" class="btn btn-primary">GUARDAR</button>
-                                    <button type="reset" id="btnCancelarDocente" class="btn btn-warning">NUEVO</button>
-                                    <button type="button" @click="buscarDocente" id="btnBuscarDocente" class="btn btn-success">BUSCAR</button>
-                                </div>
-                            </div>
+                        <div class="card-footer border-0 p-4 text-center" style="background-color: #b2ebf2;">
+                            <button type="submit" class="btn btn-info px-4 fw-bold text-white me-2 shadow-sm" style="background-color: #0097a7; border: none; border-radius: 12px;">REGISTRAR DOCENTE</button>
+                            <button type="reset" class="btn btn-outline-info px-4 fw-bold me-2" style="border-radius: 12px;">LIMPIAR</button>
+                            <button type="button" @click="buscarDocente" class="btn btn-light px-4 fw-bold border shadow-sm" style="border-radius: 12px; color: #00838f;">BUSCAR</button>
                         </div>
                     </div>
                 </form>
