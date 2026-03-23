@@ -1,124 +1,106 @@
 const busqueda_alumnos = {
-    data() {
-        return {
-            buscar: '',
-            alumnos: []
+    data(){
+        return{
+            buscar:'',
+            alumnos:[]
         }
     },
-    methods: {
-        modificarAlumno(alumno) {
+    mounted(){
+        this.obtenerAlumnos();
+    },
+    methods:{
+        modificarAlumno(alumno){
             this.$emit('modificar', alumno);
         },
-        async obtenerAlumnos() {
-            const sqlite = this.$root.sqlite;
-            const db = this.$root.db;
-            const lista = [];
-
-            // 1. Consulta con SQL real usando LIKE para buscar en código o nombre
-            // Esto es extremadamente rápido incluso con millones de registros
-            const sql = `
-                SELECT * FROM alumnos 
-                WHERE codigo LIKE '%${this.buscar}%' 
-                OR nombre LIKE '%${this.buscar}%'
-                LIMIT 50; 
-            `;
-
-            try {
-                await sqlite.exec(db, sql, (row, columns) => {
-                    const obj = {};
-                    columns.forEach((col, i) => obj[col] = row[i]);
-                    lista.push(obj);
-                });
-
-                this.alumnos = lista;
-
-                // 2. Si la base está vacía localmente, traer del servidor (Sincronización inicial)
-                if (this.alumnos.length < 1 && this.buscar.length <= 0) {
-                    fetch(`private/modulos/alumnos/alumno.php?accion=consultar`)
-                        .then(response => response.json())
-                        .then(async data => {
-                            this.alumnos = data;
-                            
-                            // Insertar masivamente en SQLite si el servidor tiene datos
-                            for (let registro of data) {
-                                await sqlite.exec(db, `
-                                    INSERT OR IGNORE INTO alumnos (idAlumno, codigo, nombre, direccion, email, telefono)
-                                    VALUES (${registro.idAlumno}, '${registro.codigo}', '${registro.nombre}', '${registro.direccion}', '${registro.email}', '${registro.telefono}')
-                                `);
-                            }
-                        });
-                }
-            } catch (err) {
-                console.error("Error al consultar SQLite:", err);
-            }
-        },
-        async eliminarAlumno(alumno, e) {
-            e.stopPropagation();
-            const sqlite = this.$root.sqlite;
-            const db = this.$root.db;
-
-            alertify.confirm('Eliminar alumno', `¿Está seguro de eliminar a ${alumno.nombre}?`, async () => {
+        async obtenerAlumnos(){
+            let totalLocal = await db.alumnos.count();
+            if(totalLocal <= 0){
+                let formData = new FormData();
+                formData.append('accion', 'consultar');
                 try {
-                    // Eliminar de SQLite
-                    await sqlite.exec(db, `DELETE FROM alumnos WHERE idAlumno = ${alumno.idAlumno}`);
+                    let respuesta = await fetch("private/modulos/alumnos/alumno.php", {
+                        method: "POST",
+                        body: formData
+                    });
+                    let data = await respuesta.json();
+                    if (Array.isArray(data) && data.length > 0) {
+                        await db.alumnos.bulkPut(data);
+                    }
+                } catch (error) { console.error(error); }
+            }
 
-                    // Sincronizar con servidor
-                    fetch(`private/modulos/alumnos/alumno.php?accion=eliminar&alumnos=${JSON.stringify(alumno)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data != true) alertify.error(`Error en servidor: ${data}`);
-                        });
+            this.alumnos = await db.alumnos.filter(
+                alumno => (
+                    alumno.codigo.toLowerCase().includes(this.buscar.toLowerCase()) 
+                    || alumno.nombre.toLowerCase().includes(this.buscar.toLowerCase())
+                    || alumno.direccion.toLowerCase().includes(this.buscar.toLowerCase())
+                )
+            ).toArray();
+        },
+        async eliminarAlumno(alumno, e){
+            e.stopPropagation();
+            alertify.confirm('Confirmar Acción', `¿Desea eliminar a ${alumno.nombre}?`, async e=>{
+                let formData = new FormData();
+                formData.append('alumnos', JSON.stringify({idAlumno: alumno.idAlumno}));
+                formData.append('accion', 'eliminar');
 
-                    this.obtenerAlumnos(); // Refrescar tabla
-                    alertify.success(`Alumno eliminado de SQLite`);
-                } catch (err) {
-                    alertify.error("No se pudo eliminar el registro");
-                }
+                try {
+                    let respuesta = await fetch("private/modulos/alumnos/alumno.php", {
+                        method: "POST",
+                        body: formData
+                    });
+                    let res = await respuesta.json();
+                    if (res === true) {
+                        await db.alumnos.delete(alumno.idAlumno);
+                        this.obtenerAlumnos();
+                        alertify.success(`Eliminado con éxito`);
+                    }
+                } catch (error) { console.error(error); }
             }, () => {});
         },
     },
-    mounted() {
-        // Cargar datos al iniciar el componente
-        // Usamos un pequeño delay para asegurar que SQLite esté listo en el root
-        setTimeout(() => {
-            this.obtenerAlumnos();
-        }, 500);
-    },
     template: `
         <div class="row">
-            <div class="col-12">
-                <table class="table table-striped table-hover" id="tblAlumnos">
-                    <thead>
-                        <tr>
-                            <th colspan="7">
-                                <input autocomplete="off" type="search" @keyup="obtenerAlumnos" v-model="buscar" placeholder="Buscar por nombre o código (SQLite Engine)..." class="form-control">
-                            </th>
-                        </tr>
-                        <tr>
-                            <th>CODIGO</th>
-                            <th>NOMBRE</th>
-                            <th>DIRECCION</th>
-                            <th>EMAIL</th>
-                            <th>TELEFONO</th>
-                            <th>ACCION</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="alumno in alumnos" :key="alumno.idAlumno" @click="modificarAlumno(alumno)" style="cursor:pointer">
-                            <td>{{ alumno.codigo }}</td>
-                            <td>{{ alumno.nombre }}</td>
-                            <td>{{ alumno.direccion }}</td>
-                            <td>{{ alumno.email }}</td>
-                            <td>{{ alumno.telefono }}</td>
-                            <td>
-                                <button class="btn btn-danger btn-sm" @click="eliminarAlumno(alumno, $event)">ELIMINAR</button>
-                            </td>
-                        </tr>
-                        <tr v-if="alumnos.length == 0">
-                            <td colspan="7" class="text-center">No se encontraron registros</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="col-11">
+                <div class="card shadow-lg border-0 mt-3" v-draggable style="background-color: #e0f2f1; border-radius: 20px; max-height: 480px; overflow: hidden;">
+                    <div class="card-header border-0 d-flex justify-content-between align-items-center p-3" style="background-color: #00acc1; color: #ffffff;">
+                        <span class="fw-bold fs-5"><i class="bi bi-person-lines-fill"></i> ALUMNOS</span>
+                        <div class="w-50">
+                            <input autocomplete="off" type="search" @keyup="obtenerAlumnos()" v-model="buscar" 
+                                placeholder="Escriba nombre o código..." class="form-control form-control-sm shadow-none border-0" style="border-radius: 20px; background-color: #ffffff;">
+                        </div>
+                    </div>
+                    <div class="card-body p-0" style="overflow-y: auto;">
+                        <table class="table table-sm table-hover mb-0 align-middle">
+                            <thead style="background-color: #b2ebf2; color: #006064; font-size: 0.8rem; text-transform: uppercase;">
+                                <tr>
+                                    <th class="ps-4 py-3">ID ACCESO</th>
+                                    <th>CÁTEDRA / ESTUDIANTE</th>
+                                    <th>DOMICILIO</th>
+                                    <th>CONTACTO DIRECTO</th>
+                                    <th class="text-end pe-4">GESTIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody style="font-size: 0.88rem; background-color: #fff;">
+                                <tr v-for="alumno in alumnos" :key="alumno.idAlumno" @click="modificarAlumno(alumno)" style="cursor: pointer; border-bottom: 1px solid #e0f7fa;">
+                                    <td class="ps-4 py-3"><span class="badge" style="background-color: #00acc1; color: #fff;">{{ alumno.codigo }}</span></td>
+                                    <td class="fw-bold text-dark">{{ alumno.nombre }}</td>
+                                    <td class="text-muted small">{{ alumno.direccion }}</td>
+                                    <td>
+                                        <div class="fw-bold text-info small">{{ alumno.email }}</div>
+                                        <div class="text-muted small">{{ alumno.telefono }}</div>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button class="btn btn-sm btn-link text-danger p-0 fw-bold text-decoration-none" @click="eliminarAlumno(alumno, $event)">Borrar</button>
+                                    </td>
+                                </tr>
+                                <tr v-if="alumnos.length === 0">
+                                    <td colspan="5" class="text-center text-muted p-5">Haga clic en el buscador o registre un nuevo alumno.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     `
