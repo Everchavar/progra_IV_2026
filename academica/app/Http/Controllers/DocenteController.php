@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Alumno;
+use App\Models\Docente;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class AlumnoController extends Controller
+class DocenteController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return alumno::get();//mostrar todos los datos de alumnos
+        return docente::get();//mostrar todos los datos de docentes
     }
 
     /**
@@ -28,14 +29,14 @@ class AlumnoController extends Controller
      */
     public function store(Request $request)
     {
-        Alumno::create($request->all());
+        Docente::create($request->all());
         return response()->json(['msg'=>'ok'], 200);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Alumno $alumno)
+    public function show(Docente $docente)
     {
         //
     }
@@ -43,7 +44,7 @@ class AlumnoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Alumno $alumno)
+    public function edit(Docente $docente)
     {
         //
     }
@@ -51,24 +52,25 @@ class AlumnoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Alumno $alumno)
+    public function update(Request $request, Docente $docente)
     {
-        $alumno::where('idAlumno', $request->idAlumno)->update([
+        $docente::where('idDocente', $request->idDocente)->update([
             'codigo' => $request->codigo,
             'nombre' => $request->nombre,
             'direccion' => $request->direccion,
             'email' => $request->email,
-            'telefono' => $request->telefono
+            'telefono' => $request->telefono,
+            'escalafon' => $request->escalafon
         ]);
-        return response()->json(['msg'=>'ok', 'idAlumno'=>$request->idAlumno], 200);
+        return response()->json(['msg'=>'ok', 'idDocente'=>$request->idDocente], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Alumno $alumno)
+    public function destroy(Request $request, Docente $docente)
     {
-        $alumno::where('idAlumno', $request['idAlumno'])->delete();
-        return response()->json(['msg'=> 'ok', 'idAlumno'=>$request['idAlumno']], 200);
+        $docente::where('idDocente', $request['idDocente'])->delete();
+        return response()->json(['msg'=> 'ok', 'idDocente'=>$request['idDocente']], 200);
     }
 }

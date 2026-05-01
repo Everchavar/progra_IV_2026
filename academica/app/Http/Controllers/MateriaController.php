@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Alumno;
+use App\Models\Materia;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class AlumnoController extends Controller
+class MateriaController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return alumno::get();//mostrar todos los datos de alumnos
+        return materia::get();
     }
 
     /**
@@ -28,14 +29,14 @@ class AlumnoController extends Controller
      */
     public function store(Request $request)
     {
-        Alumno::create($request->all());
+        Materia::create($request->all());
         return response()->json(['msg'=>'ok'], 200);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Alumno $alumno)
+    public function show(Materia $materia)
     {
         //
     }
@@ -43,7 +44,7 @@ class AlumnoController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Alumno $alumno)
+    public function edit(Materia $materia)
     {
         //
     }
@@ -51,24 +52,22 @@ class AlumnoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Alumno $alumno)
+    public function update(Request $request, Materia $materia)
     {
-        $alumno::where('idAlumno', $request->idAlumno)->update([
+        $materia::where('idMateria', $request->idMateria)->update([
             'codigo' => $request->codigo,
             'nombre' => $request->nombre,
-            'direccion' => $request->direccion,
-            'email' => $request->email,
-            'telefono' => $request->telefono
+            'uv' => $request->uv,
         ]);
-        return response()->json(['msg'=>'ok', 'idAlumno'=>$request->idAlumno], 200);
+        return response()->json(['msg'=>'ok', 'idMateria'=>$request->idMateria], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, Alumno $alumno)
+    public function destroy(Request $request, Materia $materia)
     {
-        $alumno::where('idAlumno', $request['idAlumno'])->delete();
-        return response()->json(['msg'=> 'ok', 'idAlumno'=>$request['idAlumno']], 200);
+        $materia::where('idMateria', $request['idMateria'])->delete();
+        return response()->json(['msg'=> 'ok', 'idMateria'=>$request['idMateria']], 200);
     }
 }
